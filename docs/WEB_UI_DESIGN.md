@@ -129,6 +129,9 @@ AGENTS.md
 .claude/skills/*/SKILL.md
 ```
 
+Only files for the selected engine are generated. Copilot uses root `AGENTS.md`
+plus `.github/` instructions, not `.agents/` or `.codex/` config.
+
 ### 7. Run
 
 Shows:

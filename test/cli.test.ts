@@ -197,6 +197,12 @@ describe("adapters", () => {
     expect(Object.keys(engineFiles("codex", ctx))).toContain("AGENTS.md");
     const copilot = engineFiles("copilot", ctx);
     expect(Object.keys(copilot)).toContain(".github/copilot-instructions.md");
+    expect(Object.keys(copilot)).toContain("AGENTS.md");
+    expect(Object.keys(copilot)).not.toContain(".agents/instructions.md");
+    expect(copilot.AGENTS).toBeUndefined();
+    expect(copilot["AGENTS.md"]).toContain("# AGENTS.md");
+    expect(copilot[".github/copilot-instructions.md"]).toContain("# Copilot Instructions");
+    expect(copilot[".github/copilot-instructions.md"]).not.toContain("# AGENTS.md");
   });
 
   test("dispatch prompt names the engine and requests a JSON summary", () => {
@@ -1231,6 +1237,26 @@ describe("commands.applyIntake hard creation gate", () => {
     expect(probed).toBe(false);
     expect(result.refused).toBe(false);
     expect(existsSync(join(dir, "CLAUDE.md"))).toBe(true);
+  });
+
+  test("copilot-only init generates AGENTS.md but not .agents or codex config files", () => {
+    writeSettings(dir, { tools: { codegraph: true, lsp: true } });
+    const result = applyIntake(
+      { goal: "g", engines: ["copilot"] },
+      {
+        base: dir,
+        useAi: false,
+        skipPreflight: true,
+      },
+    );
+
+    expect(result.files).toContain(".github/copilot-instructions.md");
+    expect(result.files).toContain("AGENTS.md");
+    expect(result.files).not.toContain(".agents/instructions.md");
+    expect(existsSync(join(dir, ".github", "copilot-instructions.md"))).toBe(true);
+    expect(existsSync(join(dir, "AGENTS.md"))).toBe(true);
+    expect(existsSync(join(dir, ".agents"))).toBe(false);
+    expect(existsSync(join(dir, ".codex", "config.toml"))).toBe(false);
   });
 
   test("VIBEFLOW_AI (bridge) skips the named-engine preflight so init isn't blocked offline", () => {

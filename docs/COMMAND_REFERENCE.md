@@ -33,8 +33,9 @@ vf init --interactive    # terminal intake questionnaire (TTY only)
 vf init --dry-run        # print what would be written
 ```
 
-Scans the repo and generates the minimal set: `CLAUDE.md`, `AGENTS.md`,
-`.github/copilot-instructions.md`, and `.viteflow/*` (including a seeded
+Scans the repo and generates the minimal set for the selected engine:
+`CLAUDE.md` for Claude, `AGENTS.md` for Codex and Copilot,
+`.github/copilot-instructions.md` for Copilot, and `.viteflow/*` (including a seeded
 `WORKFLOW_STATE.json`). `PROJECT_CONTEXT.md` includes a `## Detected stack` section.
 
 **Readiness gate:** a real `init` runs a live preflight (the same probe as

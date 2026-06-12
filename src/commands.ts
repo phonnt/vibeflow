@@ -415,7 +415,7 @@ export function applyIntake(answers: IntakeAnswers, opts: ApplyIntakeOpts = {}):
   // If we skip this, stale .mcp.json entries for absent binaries break engine startup
   // (Claude Code reads .mcp.json and tries to launch every registered MCP server).
   if (!opts.dry) {
-    writeToolConfigs(base, ctx.settings);
+    writeToolConfigs(base, ctx.settings, gate.engines);
   }
   // Seed the work-journal catalog (knowledge/index.md) so the engine has a file to maintain.
   // Create-if-absent only — never clobbers a human-curated index. Skipped on dry runs.
@@ -2237,11 +2237,11 @@ function printCopilotMcp(base: string, settings: VibeSettings, languages: string
  * repo-local codex `config.toml` (with structural gating), and print copilot's add commands.
  * Pure tool modules build the entries; the WRITING lives here. Languages drive LSP entries.
  */
-function writeToolConfigs(base: string, settings: VibeSettings): void {
+function writeToolConfigs(base: string, settings: VibeSettings, engines: Engine[] = ENGINES): void {
   const languages = repoLanguages(base);
-  writeClaudeMcp(base, settings, languages);
-  writeCodexMcp(base, settings, languages);
-  printCopilotMcp(base, settings, languages);
+  if (engines.includes("claude")) writeClaudeMcp(base, settings, languages);
+  if (engines.includes("codex")) writeCodexMcp(base, settings, languages);
+  if (engines.includes("copilot")) printCopilotMcp(base, settings, languages);
 }
 
 /** `vf tools enable|disable <tool>` — flip the flag in SETTINGS.json and report. When enabling

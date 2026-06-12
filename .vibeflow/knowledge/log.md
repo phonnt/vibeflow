@@ -139,3 +139,20 @@ Replaced manual version-bump flow with Google `release-please` for the npm packa
 - No changes to src/logbus.ts: `subscribe()` already returns `() => void` ✅
 - Total: 488 pass / 0 fail (481 baseline + 7 new)
 - Gates: bunx tsc --noEmit clean, bunx biome check src test clean
+
+## [2026-06-12] analysis | copilot-only UI generates codex-looking config
+- Investigated UI intake engine selection without code changes.
+- Source evidence: `src/server.html` submits `engines: fd.getAll("engine")` to `/api/init`; `src/commands.ts` uses those engines via `chosenEngines()` and `gateEngines()`.
+- Root cause candidates: `src/adapters.ts` intentionally emits `AGENTS.md` for `copilot`, and `src/commands.ts` unconditionally calls `writeToolConfigs()`, whose implementation writes Codex `.codex/config.toml` when optional tools are enabled.
+- Verification attempt: `bun --input-type=module -e ...` could not run because `proper-lockfile` dependency was not installed in the workspace.
+
+## [2026-06-12] fix | copilot-only init scoped to .github
+- Fixed Copilot adapter output so `engineFiles("copilot")` emits `.github/copilot-instructions.md` only, without `AGENTS.md` or `.agents/instructions.md`.
+- Scoped `writeToolConfigs()` by selected engines, so copilot-only init no longer writes `.codex/config.toml` even when optional tools are enabled.
+- Updated docs to state Copilot uses `.github/`, not `.agents/` or `.codex/`.
+- Verification: `bun test test/cli.test.ts` passed 91/91; `bun run lint` passed; `bun run typecheck` passed.
+
+## [2026-06-12] update | AGENTS.md shared by codex and copilot
+- Updated the Copilot contract to emit root `AGENTS.md` plus `.github/copilot-instructions.md`, while still avoiding `.agents/` and `.codex/` for copilot-only init.
+- Source check: GitHub Copilot docs say repository custom instructions use `.github/copilot-instructions.md`, and agent instructions may use `AGENTS.md` stored anywhere in the repository.
+- Verification: `bun test test/cli.test.ts` passed 91/91; `bun run typecheck` passed; `bun run lint` passed.
